@@ -3,4 +3,4 @@ RewriteEngine On
 RewriteCond %{HTTP_HOST} ^en\.(.*)$ [NC]
 RewriteRule ^(.*)$ https://www.%1/en/$1 [R=301,L]
 
-RewriteRule ^(.*)$ https://www.YOUR-OTHER-DOMAIN.COM/$1 [R=301,L]
+RewriteRule ^(.*)$ https://___PLACEHOLDER_LIVE_DOMAIN___/$1 [R=301,L]

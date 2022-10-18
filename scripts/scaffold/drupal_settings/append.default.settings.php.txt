@@ -1,0 +1,106 @@
+
+
+/**
+ * #####################################################################################################################
+ * #####################################################################################################################
+ * Custom settings by Webtourismus.at
+ * #####################################################################################################################
+ * #####################################################################################################################
+ */
+
+/**
+ * Credentials are stored in .env files
+ * @see \load.environment.php
+ */
+$databases['default']['default'] = array (
+  'database' => $_ENV['DB_NAME'],
+  'username' => $_ENV['DB_USER'],
+  'password' => $_ENV['DB_PASS'],
+  'prefix' => '',
+  'host' => $_ENV['DB_HOST'],
+  'port' => $_ENV['DB_PORT'],
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+  'driver' => 'mysql',
+);
+
+/**
+ * Enable assetions only on dev environments
+ * @see https://www.drupal.org/node/2492225
+ */
+assert_options(ASSERT_ACTIVE, $_ENV['ENV'] === 'dev');
+
+/**
+ * Disable permission hardening to avoid deployment problems
+ */
+$settings['skip_permissions_hardening'] = TRUE;
+
+/**
+* Move config sync outside of web-directory
+*/
+$settings['config_sync_directory'] = '../config/sync';
+
+/**
+ * Always trust our own dev and live server
+ */
+$settings['trusted_host_patterns'] = [
+  '\.webtourismus\.at$',
+  '\.dedi103\.your-server\.de$',
+  '\.dedi1661\.your-server\.de$',
+];
+
+/**
+ * Trust live domain from .env file
+ */
+if (!empty($_ENV['LIVE_DOMAIN'])) {
+  $settings['trusted_host_patterns'][] = '^' . str_replace('.', '\.', $_ENV['LIVE_DOMAIN']) . '$';
+}
+
+/**
+ * Performance settings
+ */
+$config['system.performance']['css']['preprocess'] = ($_ENV['ENV'] === 'live');
+$config['system.performance']['js']['preprocess'] = ($_ENV['ENV'] === 'live');
+
+/**
+ * Warn editors when they make content changes on non-live environments
+ * @see https://www.drupal.org/project/environment_indicator
+ */
+$config['environment_indicator.indicator']['name'] = ucfirst($_ENV['ENV']);
+if ($_ENV['ENV'] === 'dev') {
+  $config['environment_indicator.indicator']['fg_color'] = '#000000';
+  if (empty($_ENV['LIVE_DOMAIN'])) {
+    $config['environment_indicator.indicator']['bg_color'] = '#fff176';
+  }
+  else {
+    $config['environment_indicator.indicator']['bg_color'] = '#ef5350';
+  }
+}
+else {
+  $config['environment_indicator.indicator']['bg_color'] = '#006600';
+  $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
+}
+
+/**
+ * include environment specific settings
+ */
+if (file_exists("{$app_root}/{$site_path}/services.{$_ENV['ENV']}.yml")) {
+  $settings['container_yamls'][] = "{$app_root}/{$site_path}/services.{$_ENV['ENV']}.yml";
+}
+if (file_exists("{$app_root}/{$site_path}/settings.{$_ENV['ENV']}.php")) {
+  include "{$app_root}/{$site_path}/settings.{$_ENV['ENV']}.php";
+}
+
+/**
+ * include local overrides
+ */
+if (file_exists("{$app_root}/{$site_path}/services.local.yml")) {
+  $settings['container_yamls'][] = "{$app_root}/{$site_path}/services.local.yml";
+}
+if (file_exists("{$app_root}/{$site_path}/settings.local.php")) {
+  include "{$app_root}/{$site_path}/settings.local.php";
+}
+
+/**
+ * Exclude dev modules from config/sync
+ */
+$settings['config_exclude_modules'] = ['devel'];
