@@ -12,16 +12,17 @@
  * Credentials are stored in .env files
  * @see \load.environment.php
  */
-$databases['default']['default'] = array (
+$databases['default']['default'] = [
   'database' => $_ENV['DB_NAME'],
   'username' => $_ENV['DB_USER'],
   'password' => $_ENV['DB_PASS'],
   'prefix' => '',
-  'host' => $_ENV['DB_HOST'],
-  'port' => $_ENV['DB_PORT'],
+  'host' => $_ENV['DB_HOST'] ?? 'localhost',
+  'port' => $_ENV['DB_PORT'] ?? 3306,
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',
-);
+  'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
+];
 
 /**
  * Enable assetions only on dev environments
@@ -35,9 +36,14 @@ assert_options(ASSERT_ACTIVE, $_ENV['ENV'] === 'dev');
 $settings['skip_permissions_hardening'] = TRUE;
 
 /**
-* Move config sync outside of web-directory
-*/
+ * Move config sync outside of web-directory
+ */
 $settings['config_sync_directory'] = '../config/sync';
+
+/**
+ * Directory for private user-uploaded files outside of web-directory
+ */
+# $settings['file_private_path'] = '../private/files';
 
 /**
  * Always trust our own dev and live server
